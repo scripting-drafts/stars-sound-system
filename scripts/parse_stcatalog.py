@@ -10,6 +10,7 @@ Bright_Star_Number = 4
 name = 10
 dur_id = 11
 
+
 '''
 1-  4  I4     ---     HR       [1/9110]+ Harvard Revised Number
                                     = 
@@ -19,6 +20,7 @@ dur_id = 11
   26- 31  I6     ---     HD       [1/225300]? Henry Draper Catalog Number
   32- 37  I6     ---     SAO      [1/258997]? SAO Catalog Number
   38- 41  I4     ---     FK5      ? FK5 star Number
+  
       42  A1     ---     IRflag   [I] I if infrared source
       43  A1     ---   r_IRflag  *[ ':] Coded reference for infrared source
       44  A1     ---    Multiple *[AWDIRS] Double or multiple-star code
@@ -75,29 +77,71 @@ dur_id = 11
 info = []
 
 while True:
-    chunk = file.read(chunk_size)
-    info.append(chunk.decode('ascii'))
+    chunk = file.read(197)
+    # name = file.read(14)
+    # hr_name = file.read(25)
+    # discard = file.read(197-25)
+    # info.extend([chunk, name, hr_name])
+    
+    info.append(chunk)
+    
+    # print(chunk)
+    
 
     if not chunk:
         break
 
-info = [x for x in info if x != '']
-datalist = []
 
-for chunky in tqdm(info):
-    data = {}
-    chunky = re.sub(r'\s+', '\t', chunky)
-    chunk = chunky.split('\t')
-    chunk = list(filter(None, chunk))
-    data['Harvard Revised Number'] = chunk[0]
-    data['Name'] = chunk[1]
-    data['Henry Draper Catalog Number'] = chunk[2]
-    datalist.append(data)
-    print(chunk)
 
-keys = datalist[0].keys()
+def label_data(info):
+    '''Decodes string lists, removes characters, finds valuable strings'''
+    Harvard_Revised_Number = None
+    last_Harvard_Revised_Number = None
+    for chunk in info[:32]:
+        chunk = chunk.decode('ascii')
+        chunk = chunk.strip()
+        chunk = re.sub('\n', '', chunk)
+        Harvard_Revised_Number = re.findall(r'^\d+', chunk)
+        print(chunk)
+        
+        if '' not in Harvard_Revised_Number and Harvard_Revised_Number[:1]:
+            Harvard_Revised_Number = int(''.join(Harvard_Revised_Number))
+            
+            if last_Harvard_Revised_Number is None:
+                print(f'\nHarvard_Revised_Number: {Harvard_Revised_Number}\n\n\n')
 
-with open('../data/st_catalog.csv', 'w', encoding='ascii', newline='') as f:
-    dict_writer = csv.DictWriter(f, keys, dialect='excel', delimiter=';')
-    dict_writer.writeheader()
-    dict_writer.writerows(datalist)
+            elif Harvard_Revised_Number == last_Harvard_Revised_Number + 1:
+                print(f'\nHarvard_Revised_Number: {Harvard_Revised_Number}\n\n\n')
+            
+            last_Harvard_Revised_Number = Harvard_Revised_Number
+    
+    
+label_data(info)
+
+
+# info = [x for x in info if x != '']
+# datalist = []
+
+# for chunky in tqdm(info):
+#     data = {}
+#     chunky = re.sub(r'\s+', '\t', chunky)
+#     chunk = chunky.split('\t')
+#     chunk = list(filter(None, chunk))
+#     data['Harvard Revised Number'] = chunk[0]
+#     data['Name'] = chunk[1]
+    
+#     # ? 
+#     # data['Henry Draper Catalog Number'] = chunk[2]
+#     # data['SAO Catalog Number'] = chunk[3]
+#     # data['FK5 star Number'] = chunk[4]
+#     # SAO Catalog Number
+    
+#     datalist.append(data)
+#     print(chunk)
+
+# keys = datalist[0].keys()
+
+# with open('../data/st_catalog.csv', 'w', encoding='ascii', newline='') as f:
+#     dict_writer = csv.DictWriter(f, keys, dialect='excel', delimiter=';')
+#     dict_writer.writeheader()
+#     dict_writer.writerows(datalist)
