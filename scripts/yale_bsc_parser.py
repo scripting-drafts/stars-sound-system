@@ -86,7 +86,9 @@ else:
 # The "centre" of the constellation in RA, dec:
 ra0 = sum([star.ra for star in stars]) / n
 dec0 = sum([star.dec for star in stars]) / n
+
 x, y = [None]*n, [None]*n
+
 for i, star in enumerate(stars):
     # Orthographic projection (ra, dec) -> (x1, y1)
     x[i], y[i] = star.project_orthographic(ra0, dec0)
