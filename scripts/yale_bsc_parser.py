@@ -55,6 +55,7 @@ with open(r'..\data\bsc5.dat', 'r') as fi:
         name = line[4:14]
         try:
             mag = float(line[102:107])
+            print(mag)
         except ValueError:
             # some stars do not have magnitudes: ignore these entries
             continue
@@ -80,6 +81,9 @@ if n==0:
     sys.exit(1)
 else:
     print('Found {:d} stars in the constellation {:s}'.format(n,constellation))
+    print('equinox J2000, epoch 2000.0')
+    for star in stars:
+        print(star.name, star.mag, star.ra, star.dec)
 
 # Now calculate the projected co-ordinates of each star, (x,y), finding the
 # maximum and minimum values and hence the aspect ratio for our image.
