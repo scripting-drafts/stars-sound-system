@@ -1,5 +1,5 @@
 import re
-from scripts.custom_arange import *
+from custom_arange import *
 
 taurus = {'aldebaran': 'K5III'}
 
@@ -16,7 +16,7 @@ class stars_processor:
             'G0': 12
         }
 
-    def get_rotation(self, spectral_type=None):
+    def read_rotation(self, spectral_type=None):
         stellar_class_let = ''.join(re.findall(r'^\D', spectral_type))
         print(stellar_class_let)
         stellar_class_num = int(''.join(re.findall(r'\d', spectral_type)))
@@ -50,7 +50,23 @@ class stars_processor:
     def get_luminosity(self):
         return
     
+    def get_rotation(self, name):
+        rotations = []
 
-sp = stars_processor()
-r = sp.get_rotation(taurus['aldebaran'])
-print(r)
+        with open(r'..\data\catalog', 'rb') as fi:
+            for line in fi.readlines():
+                if line[4:14] != name:
+                    continue
+                else:
+                    try:
+                        rotations.append(float(line[166:180]))
+                    except ValueError:
+                        print('asd')
+
+        return rotations
+
+
+
+# sp = stars_processor()
+# r = sp.get_rotation(taurus['aldebaran'])
+# print(r)
