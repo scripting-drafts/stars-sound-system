@@ -1,10 +1,9 @@
 import sys
 import math
-# from bin_stars_processor import stars_processor
+from stars_processor import stars_processor
 
 try:
     constellation = sys.argv[1]
-    # sp = stars_processor()
 
 except IndexError:
     print('usage:\n'
@@ -21,18 +20,20 @@ class Star():
 
     """
 
-    def __init__(self, name, mag, ra, dec, rotation=None):
+    def __init__(self, name, mag, ra, dec, spectral_type):
         """
         Initializes the star object with its name and magnitude, and position
         as right ascension (ra) and declination (dec), both in radians.
 
         """
+        sp = stars_processor()
 
         self.name = name
         self.mag = mag
         self.ra = ra
         self.dec = dec
-        self.rotation = rotation
+        self.spectral_type = spectral_type
+        self.rotation = sp.get_rotation_velocity(spectral_type)
 
     def project_orthographic(self, ra0, dec0):
         """
@@ -64,7 +65,7 @@ def get_stars_in_constellation(constellation):
 
             name = line[4:14]
             try:
-                mag = float(line[102:107])
+                mag = float(line[102:107])  # might be rounding down
                 # rot = float(line[160:180])
                 # print(rot)
                 # print(mag)
@@ -83,16 +84,9 @@ def get_stars_in_constellation(constellation):
             # seconds from the (negative) degrees.
             sgn = math.copysign(1, dec_deg)
             dec = math.radians(dec_deg + sgn * dec_min/60 + sgn * dec_sec/3600)
+            spectral_type = line[129:131]
 
-            ### ATTENTION ROTATION TAKEN
-            # rotation = sp.get_rotation(name)
-            # print(rotation)
-
-            # # Create a new Star object and add it to the list of stars
-            # if rotation:
-            #     stars.append(Star(name, mag, ra, dec, rotation))
-            # else:
-            stars.append(Star(name, mag, ra, dec))
+            stars.append(Star(name, mag, ra, dec, spectral_type))
 
     n = len(stars)
     if n==0:
@@ -103,9 +97,9 @@ def get_stars_in_constellation(constellation):
         print('equinox J2000, epoch 2000.0')
         for star in stars:
             if star.rotation:
-                print(star.name, star.mag, star.ra, star.dec, stars.rotation)
+                print(star.name, star.mag, star.ra, star.dec, star.spectral_type, star.rotation)
             else:
-                print(star.name, star.mag, star.ra, star.dec)
+                print(star.name, star.mag, star.ra, star.dec, star.spectral_type)
     
     return stars, n
 
