@@ -1,3 +1,28 @@
+def help_module():
+    print('Constellations are:\n')
+    const_list = []
+    with open(r'..\data\bsc5.dat', 'r') as fi:
+        for line in fi.readlines():
+            const_list.append(line[11:14])
+    const_set = set(const_list)
+    print(const_set)
+
+constellations = [
+    "Andromeda", "Antlia", "Apus", "Aquarius", "Aquila", "Ara", "Aries", "Auriga", 
+    "Bootes", "Caelum", "Camelopardalis", "Cancer", "Canes Venatici", "Canis Major", 
+    "Canis Minor", "Capricornus", "Carina", "Cassiopeia", "Centaurus", "Cepheus", 
+    "Cetus", "Chamaeleon", "Circinus", "Columba", "Coma Berenices", "Corona Australis", 
+    "Corona Borealis", "Corvus", "Crater", "Crux", "Cygnus", "Delphinus", "Dorado", 
+    "Draco", "Equuleus", "Eridanus", "Fornax", "Gemini", "Grus", "Hercules", "Horologium", 
+    "Hydra", "Hydrus", "Indus", "Lacerta", "Leo", "Leo Minor", "Lepus", "Libra", "Lupus", 
+    "Lynx", "Lyra", "Mensa", "Microscopium", "Monoceros", "Musca", "Norma", "Octans", 
+    "Ophiuchus", "Orion", "Pavo", "Pegasus", "Perseus", "Phoenix", "Pictor", "Pisces", 
+    "Piscis Austrinus", "Puppis", "Pyxis", "Reticulum", "Sagitta", "Sagittarius", "Scorpius", 
+    "Sculptor", "Scutum", "Serpens", "Sextans", "Taurus", "Telescopium", "Triangulum", 
+    "Triangulum Australe", "Tucana", "Ursa Major", "Ursa Minor", "Vela", "Virgo", "Volans", 
+    "Vulpecula"
+]
+
 '''
 1-  4  I4     ---     HR       [1/9110]+ Harvard Revised Number
                                     = 
@@ -60,3 +85,4 @@
  195-196  I2     ---     MultCnt  ? Number of components assigned to a multiple
      197  A1     ---     NoteFlag [*] a star indicates that there is a note
                                     (see file notes)'''
+
