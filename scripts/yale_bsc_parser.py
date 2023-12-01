@@ -60,9 +60,6 @@ def get_stars_in_constellation(constellation):
     stars = []
     with open(r'..\data\bsc5.dat', 'r') as fi:
         for line in fi.readlines():
-            
-            # print(line[11:14])
-            # line = line.decode('utf-8')
             if line[11:14] != constellation:
                 continue
 

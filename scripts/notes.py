@@ -1,11 +1,16 @@
+import re
+
 def help_module():
     print('Constellations are:\n')
     const_list = []
     with open(r'..\data\bsc5.dat', 'r') as fi:
         for line in fi.readlines():
-            const_list.append(line[11:14])
+            if not re.match('\\d+', line[11:14]) and not ' ' in line[11:14]:
+                const_abr = line[11:14]
+                const_list.append(const_abr)
     const_set = set(const_list)
     print(const_set)
+    print(len(const_set))
 
 constellations = [
     "Andromeda", "Antlia", "Apus", "Aquarius", "Aquila", "Ara", "Aries", "Auriga", 

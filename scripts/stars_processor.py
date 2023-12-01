@@ -17,7 +17,7 @@ class stars_processor():
         Class S stars have excess amounts of zirconium and other elements produced by the s-process (slow neutron capture process), and have more similar carbon and oxygen abundances than class M or carbon stars'''
         
     def parse_spectral_type(self, spectral_type):
-        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M)', spectral_type))    # |K|M
+        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M)', spectral_type))
         num = int(''.join(re.findall(r'\d', spectral_type)))    # Gets only int
 
         return letter, num
@@ -62,7 +62,6 @@ class stars_processor():
                 'F5': 25,
                 'G0': 12,
                 'G9': 1
-
             }
 
             linspace_index = [num-1 if num != 0 else num]
