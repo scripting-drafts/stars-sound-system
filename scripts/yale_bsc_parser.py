@@ -122,7 +122,7 @@ def generate_stars_map(stars, n):
     width = int(height * aspect_ratio)
 
     # Write the SVG image file for the constellation
-    with open('{:s}.svg'.format(constellation), 'w') as f:
+    with open(r'../data/{:s}.svg'.format(constellation), 'w') as f:
         print('<?xml version="1.0" encoding="utf-8"?>', file=f)
         print('<svg xmlns="http://www.w3.org/2000/svg"', file=f)
         print('     xmlns:xlink="http://www.w3.org/1999/xlink"', file=f)
