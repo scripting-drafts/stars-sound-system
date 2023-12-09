@@ -26,7 +26,7 @@ class Star():
 
     """
 
-    def __init__(self, name, mag, ra, dec, spectral_type):
+    def __init__(self, name, mag, ra, dec, spectral_type, spectral_type_properties):
         """
         Initializes the star object with its name and magnitude, and position
         as right ascension (ra) and declination (dec), both in radians.
@@ -39,6 +39,7 @@ class Star():
         self.ra = ra
         self.dec = dec
         self.spectral_type = spectral_type
+        self.lum = sp.get_luminosity(spectral_type_properties) if spectral_type_properties is not None else None
         self.rotation = sp.get_rotation_velocity(spectral_type)
         self.temperature = sp.get_temperature(spectral_type)
 
@@ -63,6 +64,7 @@ def get_stars_in_constellation(constellation):
             if line[11:14] != constellation:
                 continue
 
+            # print(line)
             name = line[4:14]
             try:
                 mag = float(line[102:107])  # might be rounding down
@@ -87,8 +89,9 @@ def get_stars_in_constellation(constellation):
             sgn = math.copysign(1, dec_deg)
             dec = math.radians(dec_deg + sgn * dec_min/60 + sgn * dec_sec/3600)
             spectral_type = line[129:131]
+            spectral_type_properties = line[131:139]
 
-            stars.append(Star(name, mag, ra, dec, spectral_type))
+            stars.append(Star(name, mag, ra, dec, spectral_type, spectral_type_properties))
 
     n = len(stars)
     if n==0:

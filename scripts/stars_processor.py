@@ -97,3 +97,16 @@ class stars_processor():
 
         except Exception:
              return None
+        
+    def get_luminosity(self, spectral_type_properties):
+        '''Yerkes luminosity classes
+        Randomest example K0II-IIIFe-0.5 (Tau Puppies)'''
+        # letter, num = self.parse_spectral_type(spectral_type)
+        spectral_type_properties = spectral_type_properties.replace('.5', '0.5')
+        
+        # lum_c = re.sub(sep, '', spectral_type_properties)
+        # lum_c = ''.join(re.findall(r'\d?\D+?', sp))
+
+        # print(lum_c)
+
+        return spectral_type_properties
