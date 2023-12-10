@@ -26,10 +26,11 @@ class Star():
 
     """
 
-    def __init__(self, name, mag, ra, dec, spectral_type, spectral_type_properties):
+    def __init__(self, name, mag, ra, dec, spectral_type):
         """
         Initializes the star object with its name and magnitude, and position
-        as right ascension (ra) and declination (dec), both in radians.
+        as right ascension (ra) and declination (dec) (in radians), spectral type, rotation
+        temperature, and luminosity
 
         """
         sp = stars_processor()
@@ -38,10 +39,12 @@ class Star():
         self.mag = mag
         self.ra = ra
         self.dec = dec
-        self.spectral_type = spectral_type
-        self.lum = sp.get_luminosity(spectral_type_properties) if spectral_type_properties is not None else None
+
+        letter, num, props = sp.parse_spectral_type(spectral_type)
+        self.spectral_type = f'{letter}{num}{props}'
         self.rotation = sp.get_rotation_velocity(spectral_type)
         self.temperature = sp.get_temperature(spectral_type)
+        self.lum = sp.get_luminosity(spectral_type)
 
     def project_orthographic(self, ra0, dec0):
         """
@@ -88,10 +91,13 @@ def get_stars_in_constellation(constellation):
             # seconds from the (negative) degrees.
             sgn = math.copysign(1, dec_deg)
             dec = math.radians(dec_deg + sgn * dec_min/60 + sgn * dec_sec/3600)
-            spectral_type = line[129:131]
-            spectral_type_properties = line[131:139]
+            
+            # spectral_type = line[129:131]
+            # spectral_type_properties = line[131:139]
+            spectral_type = line[129:139]
+            print(spectral_type)
 
-            stars.append(Star(name, mag, ra, dec, spectral_type, spectral_type_properties))
+            stars.append(Star(name, mag, ra, dec, spectral_type))
 
     n = len(stars)
     if n==0:

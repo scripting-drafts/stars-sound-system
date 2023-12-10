@@ -1,5 +1,5 @@
 import re
-from math import floor
+from math import floor, modf
 import numpy as np
 
 class stars_processor():
@@ -7,7 +7,6 @@ class stars_processor():
         '''Spectral type: O-A, 0-5
         TODO:
          - No rotation desginated for M and K class Spectral Types
-         - Clarify what .5 means
         
         Additional Information:
         Class L dwarfs get their designation because they are cooler than M stars and L is the remaining letter alphabetically closest to M. 
@@ -17,13 +16,27 @@ class stars_processor():
         Class S stars have excess amounts of zirconium and other elements produced by the s-process (slow neutron capture process), and have more similar carbon and oxygen abundances than class M or carbon stars'''
         
     def parse_spectral_type(self, spectral_type):
-        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M)', spectral_type))
-        num = int(''.join(re.findall(r'\d', spectral_type)))    # Gets only int
+        spectral_type = spectral_type.strip()
+        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M)', spectral_type[:1]))
+        # excluded_letter = spectral_type.replace(letter, '', 1)
+        nums = ''.join(re.findall(r'\d\.?\d?', spectral_type[1:])[0])
 
-        return letter, num
+        if nums.isdigit():
+            num = int(nums)
+        else:
+            num = float(nums)
+
+        try:
+            props = spectral_type.lstrip(f'{letter}{num}')
+        except Exception as e:
+            props = ''
+            print(e)
+        
+
+        return letter, num, props
     
     def get_temperature(self, spectral_type):
-        letter, num = self.parse_spectral_type(spectral_type)
+        letter, num, _ = self.parse_spectral_type(spectral_type)
 
         t_scale = {
             'O': [30000, 70000],
@@ -35,23 +48,30 @@ class stars_processor():
             'M': [2400, 3700]
         }
 
-        linspace_index = [num-1 if num != 0 else num]
         selected_temp_range = t_scale[f'{letter}']
+        logarythmic_temp_range_for_int = np.linspace(selected_temp_range[1], selected_temp_range[0], 10)
         
         if type(num) is int:
-            logarythmic_temp_for_int = np.linspace(selected_temp_range[1], selected_temp_range[0], 9)[linspace_index]
-            temperature = logarythmic_temp_for_int
-            
+            temperature = logarythmic_temp_range_for_int[num]            
         else:
-            pass
+            floor_value = int(floor(num))
+            frac, _ = modf(num)
+            abs_frac = frac * 10
+
+            logarythmic_temp_for_int = logarythmic_temp_range_for_int[floor_value]
+            logarythmic_temp_for_float = np.linspace(selected_temp_range[1], selected_temp_range[0], 100)
+            diff = (logarythmic_temp_for_float[1] - logarythmic_temp_for_float[0]) * abs_frac
+            temperature = logarythmic_temp_for_int + diff
         
         return temperature
 
     def get_rotation_velocity(self, spectral_type):
-        ''' K, M Spectral TBA'''
-        letter, num = self.parse_spectral_type(spectral_type)
+        '''TODO:
+        K, M Spectral
+        Assumes same Spectral Type limits (F0 == A9)  and min rotation at G9'''
+        letter, num, _ = self.parse_spectral_type(spectral_type)
 
-        if letter != ('M', 'K'):
+        if letter not in ['M', 'K']:
             r_scale = {
                 'O0': 190,
                 'B0': 200,
@@ -63,50 +83,51 @@ class stars_processor():
                 'G0': 12,
                 'G9': 1
             }
-
-            linspace_index = [num-1 if num != 0 else num]
             
             if type(num) is int:
                 logarythmic_rotations_for_int = {
-                    f'O{num}': np.linspace(r_scale['O0'], r_scale['B0'], 9)[linspace_index],
-                    f'B{num}': np.linspace(r_scale['B0'], r_scale['A0'], 9)[linspace_index],
-                    f'A{num}': np.linspace(r_scale['A0'], r_scale['F0'], 9)[linspace_index],
-                    f'F{num}': np.linspace(r_scale['F0'], r_scale['G0'], 9)[linspace_index],
-                    f'G{num}': np.linspace(r_scale['G0'], r_scale['G9'], 9)[linspace_index]
+                    f'O{num}': np.linspace(r_scale['O0'], r_scale['B0'], 10)[num],
+                    f'B{num}': np.linspace(r_scale['B0'], r_scale['A0'], 10)[num],
+                    f'A{num}': np.linspace(r_scale['A0'], r_scale['F0'], 10)[num],
+                    f'F{num}': np.linspace(r_scale['F0'], r_scale['G0'], 10)[num],
+                    f'G{num}': np.linspace(r_scale['G0'], r_scale['G9'], 10)[num]
                 }
                 
-                logarythmic_rotations = logarythmic_rotations_for_int
+                rotation = float(logarythmic_rotations_for_int[f'{letter}{num}'])
 
             else:
+                floor_value = int(floor(num))
+                frac, _ = modf(num)
+                abs_frac = frac * 10
+
                 logarythmic_rotations_for_float = {
-                    f'O{num}': np.linspace(r_scale['O0'], r_scale['B0'], 9)[int(floor(num))],
-                    f'B{num}': np.linspace(r_scale['B0'], r_scale['A0'], 9)[int(floor(num))],
-                    f'A{num}': np.linspace(r_scale['A0'], r_scale['F0'], 9)[int(floor(num))],
-                    f'F{num}': np.linspace(r_scale['F0'], r_scale['G0'], 9)[int(floor(num))],
-                    f'G{num}': np.linspace(r_scale['G0'], r_scale['G9'], 9)[int(floor(num))]
+                    f'O{floor_value}': np.linspace(r_scale['O0'], r_scale['B0'], 10)[floor_value],
+                    f'B{floor_value}': np.linspace(r_scale['B0'], r_scale['A0'], 10)[floor_value],
+                    f'A{floor_value}': np.linspace(r_scale['A0'], r_scale['F0'], 10)[floor_value],
+                    f'F{floor_value}': np.linspace(r_scale['F0'], r_scale['G0'], 10)[floor_value],
+                    f'G{floor_value}': np.linspace(r_scale['G0'], r_scale['G9'], 10)[floor_value]
                 }
 
-                logarythmic_rotations = logarythmic_rotations_for_float
-        
-        else:
-            return None
+                # TODO: REVIEW
+                logarythmic_rotations_float = {
+                    f'O{floor_value}': np.linspace(r_scale['O0'], r_scale['B0'], 100),
+                    f'B{floor_value}': np.linspace(r_scale['B0'], r_scale['A0'], 100),
+                    f'A{floor_value}': np.linspace(r_scale['A0'], r_scale['F0'], 100),
+                    f'F{floor_value}': np.linspace(r_scale['F0'], r_scale['G0'], 100),
+                    f'G{floor_value}': np.linspace(r_scale['G0'], r_scale['G9'], 100)
+                }
 
-        try:
-            rotation = logarythmic_rotations[f'{letter}{num}']
-            return rotation
-
-        except Exception:
-             return None
+                diff = (logarythmic_rotations_float[f'{letter}{floor_value}'][0] - logarythmic_rotations_float[f'{letter}{floor_value}'][1]) * abs_frac
+                rotation = float(logarythmic_rotations_for_float[f'{letter}{floor_value}'] + diff)
         
-    def get_luminosity(self, spectral_type_properties):
+        elif letter in ['M', 'K']:
+            rotation = np.nan
+        
+        return rotation
+        
+    def get_luminosity(self, spectral_type):
         '''Yerkes luminosity classes
         Randomest example K0II-IIIFe-0.5 (Tau Puppies)'''
-        # letter, num = self.parse_spectral_type(spectral_type)
-        spectral_type_properties = spectral_type_properties.replace('.5', '0.5')
-        
-        # lum_c = re.sub(sep, '', spectral_type_properties)
-        # lum_c = ''.join(re.findall(r'\d?\D+?', sp))
+        _, _, props = self.parse_spectral_type(spectral_type)
 
-        # print(lum_c)
-
-        return spectral_type_properties
+        return props
