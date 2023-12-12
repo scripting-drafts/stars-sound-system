@@ -1,24 +1,6 @@
 # Source: http://
-# import sys
-import re
 import math
 from stars_processor import stars_processor
-from notes import help_module
-
-# try:
-#     if sys.argv[1] != '--help':
-#         constellation = sys.argv[1]
-
-#     elif sys.argv[1] == '--help':
-#         help_module()
-
-# except IndexError:
-#     print('''usage:
-#           python {:s} <constellation>
-#           where <constellation> is the three-letter abbreviation for a
-#           constellation name (e.g. Ori, Lyr, UMa, ...)'''.format(sys.argv[0]))
-#     print('Type --help for more information')
-#     sys.exit(1)
 
 class Star():
     """
@@ -37,7 +19,7 @@ class Star():
         """
         sp = stars_processor()
 
-        self.const = const
+        self.const = sp.get_const_complete_name(const)
         self.star_num, self.name = sp.parse_name(const, name)
         self.mag = mag
         self.ra = ra
@@ -72,7 +54,8 @@ def get_stars_in_constellation(constellation):
     stars = []
     with open(r'..\data\bsc5.dat', 'r') as fi:
         for line in fi.readlines():
-            if line[11:14] != constellation:
+            const = line[11:14]
+            if const != constellation:
                 continue
             
             # print(line)
@@ -105,19 +88,14 @@ def get_stars_in_constellation(constellation):
             # spectral_type = line[129:131]
             # spectral_type_properties = line[131:139]
             spectral_type = line[129:139]
-            temp = line[177:179]
+            
+            # TEST
+            # temp = line[177:179]
             # print(temp)
 
             stars.append(Star(constellation, name, mag, ra, dec, spectral_type))
 
     n = len(stars)
-    if n==0:
-        print('Constellation {:s} not found.'.format(constellation))
-        # sys.exit(1)
-        quit()
-    else:
-        print('Found {:d} stars in the constellation {:s}'.format(n,constellation))
-        print('equinox J2000, epoch 2000.0')
     
     return stars, n
 

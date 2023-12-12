@@ -1,6 +1,7 @@
 import re
 from math import floor, modf
 import numpy as np
+import info
 
 class stars_processor():
     def __init__(self):
@@ -21,7 +22,6 @@ class stars_processor():
         letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M|L|T|Y|C|S)', spectral_type[:1]))
         nums = ''.join(re.findall(r'(\d.\d|\d?)', spectral_type[1:])[0])
         # print(spectral_type)
-
 
         if nums != '':
             if nums.isdigit():
@@ -44,7 +44,6 @@ class stars_processor():
             props = ''
             print(e)
         
-
         return letter, num, props
     
     def parse_name(self, const, name):
@@ -55,8 +54,6 @@ class stars_processor():
         Durchmusterung_name = name.group(3)
         Durchmusterung_name = Durchmusterung_name.lstrip(const)
         
-        # print(name)
-
         return star_num, Durchmusterung_name
 
     def get_temperature(self, spectral_type):
@@ -161,3 +158,28 @@ class stars_processor():
         _, _, props = self.parse_spectral_type(spectral_type)
 
         return props
+    
+    def get_const_complete_name(self, const):
+
+        '''
+        TODO:
+            MAKES IT SOOOOOOOOO SLOW
+            Get only new constellation name every time it changes
+        
+        '''
+        consts = info.get_available_consts()
+
+        # def check_const_name_arch(const):
+        #     is_compound_noun = const[1].isupper()
+            
+        #     return is_compound_noun
+        
+        # is_compound_noun = check_const_name_arch(const)
+        # if is_compound_noun:
+
+        
+        # const_name = ''.join([each for each in info.constellations if each.startswith(const)])
+        const_name = info.constellations[consts.index(const)]
+
+        return const_name
+
