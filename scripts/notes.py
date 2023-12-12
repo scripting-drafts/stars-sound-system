@@ -12,6 +12,18 @@ def help_module():
     print(const_set)
     print(len(const_set))
 
+def get_available_consts():
+    const_list = []
+    with open(r'..\data\bsc5.dat', 'r') as fi:
+        for line in fi.readlines():
+            if not re.match('\\d+', line[11:14]) and not ' ' in line[11:14]:
+                const_abr = line[11:14]
+                const_list.append(const_abr)
+    const_set = set(const_list)
+
+    return const_set
+
+
 constellations = [
     "Andromeda", "Antlia", "Apus", "Aquarius", "Aquila", "Ara", "Aries", "Auriga", 
     "Bootes", "Caelum", "Camelopardalis", "Cancer", "Canes Venatici", "Canis Major", 

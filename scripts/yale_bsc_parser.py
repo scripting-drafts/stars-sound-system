@@ -1,22 +1,24 @@
-import sys
+# Source: http://
+# import sys
+import re
 import math
 from stars_processor import stars_processor
 from notes import help_module
 
-try:
-    if sys.argv[1] != '--help':
-        constellation = sys.argv[1]
+# try:
+#     if sys.argv[1] != '--help':
+#         constellation = sys.argv[1]
 
-    elif sys.argv[1] == '--help':
-        help_module()
+#     elif sys.argv[1] == '--help':
+#         help_module()
 
-except IndexError:
-    print('''usage:
-          python {:s} <constellation>
-          where <constellation> is the three-letter abbreviation for a
-          constellation name (e.g. Ori, Lyr, UMa, ...)'''.format(sys.argv[0]))
-    print('Type --help for more information')
-    sys.exit(1)
+# except IndexError:
+#     print('''usage:
+#           python {:s} <constellation>
+#           where <constellation> is the three-letter abbreviation for a
+#           constellation name (e.g. Ori, Lyr, UMa, ...)'''.format(sys.argv[0]))
+#     print('Type --help for more information')
+#     sys.exit(1)
 
 class Star():
     """
@@ -26,7 +28,7 @@ class Star():
 
     """
 
-    def __init__(self, name, mag, ra, dec, spectral_type):
+    def __init__(self, const, name, mag, ra, dec, spectral_type):
         """
         Initializes the star object with its name and magnitude, and position
         as right ascension (ra) and declination (dec) (in radians), spectral type, rotation
@@ -35,7 +37,8 @@ class Star():
         """
         sp = stars_processor()
 
-        self.name = name
+        self.const = const
+        self.star_num, self.name = sp.parse_name(const, name)
         self.mag = mag
         self.ra = ra
         self.dec = dec
@@ -61,14 +64,21 @@ class Star():
         return self.x, self.y
 
 def get_stars_in_constellation(constellation):
+    '''
+    TODO: Filter name OK
+    
+    '''
+
     stars = []
     with open(r'..\data\bsc5.dat', 'r') as fi:
         for line in fi.readlines():
             if line[11:14] != constellation:
                 continue
-
+            
             # print(line)
-            name = line[4:14]
+            name = line[4:21]
+            # name = line[:21]
+
             try:
                 mag = float(line[102:107])  # might be rounding down
 
@@ -95,21 +105,23 @@ def get_stars_in_constellation(constellation):
             # spectral_type = line[129:131]
             # spectral_type_properties = line[131:139]
             spectral_type = line[129:139]
-            print(spectral_type)
+            temp = line[177:179]
+            # print(temp)
 
-            stars.append(Star(name, mag, ra, dec, spectral_type))
+            stars.append(Star(constellation, name, mag, ra, dec, spectral_type))
 
     n = len(stars)
     if n==0:
         print('Constellation {:s} not found.'.format(constellation))
-        sys.exit(1)
+        # sys.exit(1)
+        quit()
     else:
         print('Found {:d} stars in the constellation {:s}'.format(n,constellation))
         print('equinox J2000, epoch 2000.0')
     
     return stars, n
 
-def generate_stars_map(stars, n):
+def generate_stars_map(stars, n, constellation):
     # Now calculate the projected co-ordinates of each star, (x,y), finding the
     # maximum and minimum values and hence the aspect ratio for our image.
     # The "centre" of the constellation in RA, dec:

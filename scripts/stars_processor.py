@@ -4,9 +4,10 @@ import numpy as np
 
 class stars_processor():
     def __init__(self):
-        '''Spectral type: O-A, 0-5
+        '''
         TODO:
          - No rotation desginated for M and K class Spectral Types
+         -  Clear up 'if num is not None'
         
         Additional Information:
         Class L dwarfs get their designation because they are cooler than M stars and L is the remaining letter alphabetically closest to M. 
@@ -17,17 +18,28 @@ class stars_processor():
         
     def parse_spectral_type(self, spectral_type):
         spectral_type = spectral_type.strip()
-        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M)', spectral_type[:1]))
-        # excluded_letter = spectral_type.replace(letter, '', 1)
-        nums = ''.join(re.findall(r'\d\.?\d?', spectral_type[1:])[0])
+        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M|L|T|Y|C|S)', spectral_type[:1]))
+        nums = ''.join(re.findall(r'(\d.\d|\d?)', spectral_type[1:])[0])
+        # print(spectral_type)
 
-        if nums.isdigit():
-            num = int(nums)
+
+        if nums != '':
+            if nums.isdigit():
+                num = int(nums)
+            elif not nums.isdigit():
+                if '/' in nums or '-' in nums or ',' in nums:
+                    nums_l = [each for each in nums]
+                    any(each in nums_l for each in ['/', '-', ','])
+                    nums = re.sub(r'/\d?|\-\d?|,\d?', '', nums)
+                num = float(nums)
         else:
-            num = float(nums)
-
+            num = None
+        
         try:
-            props = spectral_type.lstrip(f'{letter}{num}')
+            if num is not None:
+                props = spectral_type.lstrip(f'{letter}{num}')
+            else:
+                props = spectral_type.lstrip(f'{letter}')
         except Exception as e:
             props = ''
             print(e)
@@ -35,43 +47,61 @@ class stars_processor():
 
         return letter, num, props
     
+    def parse_name(self, const, name):
+        name = name.strip()
+        name = re.search(r'(\b\w+)?(\s+)?(\w+[\.*]?[\w+]*)', name)
+        # print(name.groups())
+        star_num = name.group(1)
+        Durchmusterung_name = name.group(3)
+        Durchmusterung_name = Durchmusterung_name.lstrip(const)
+        
+        # print(name)
+
+        return star_num, Durchmusterung_name
+
     def get_temperature(self, spectral_type):
         letter, num, _ = self.parse_spectral_type(spectral_type)
 
-        t_scale = {
-            'O': [30000, 70000],
-            'B': [10000, 30000],
-            'A': [7500, 10000],
-            'F': [6000, 7500],
-            'G': [5200, 6000],
-            'K': [3700, 5200],
-            'M': [2400, 3700]
-        }
+        if num is not None:
+            t_scale = {
+                'O': [30000, 70000],
+                'B': [10000, 30000],
+                'A': [7500, 10000],
+                'F': [6000, 7500],
+                'G': [5200, 6000],
+                'K': [3700, 5200],
+                'M': [2400, 3700],
+                'S': [1800, 4000],
+                'C': [700, 3500],   # Specular temperature
+                'Y': [300, 700]
+            }
 
-        selected_temp_range = t_scale[f'{letter}']
-        logarythmic_temp_range_for_int = np.linspace(selected_temp_range[1], selected_temp_range[0], 10)
-        
-        if type(num) is int:
-            temperature = logarythmic_temp_range_for_int[num]            
+            selected_temp_range = t_scale[f'{letter}']
+            logarythmic_temp_range_for_int = np.linspace(selected_temp_range[1], selected_temp_range[0], 10)
+            
+            if type(num) is int:
+                temperature = logarythmic_temp_range_for_int[num]            
+            else:
+                floor_value = int(floor(num))
+                frac, _ = modf(num)
+                abs_frac = frac * 10
+
+                logarythmic_temp_for_int = logarythmic_temp_range_for_int[floor_value]
+                logarythmic_temp_for_float = np.linspace(selected_temp_range[1], selected_temp_range[0], 100)
+                diff = (logarythmic_temp_for_float[1] - logarythmic_temp_for_float[0]) * abs_frac
+                temperature = logarythmic_temp_for_int + diff
+            
+            return temperature
         else:
-            floor_value = int(floor(num))
-            frac, _ = modf(num)
-            abs_frac = frac * 10
-
-            logarythmic_temp_for_int = logarythmic_temp_range_for_int[floor_value]
-            logarythmic_temp_for_float = np.linspace(selected_temp_range[1], selected_temp_range[0], 100)
-            diff = (logarythmic_temp_for_float[1] - logarythmic_temp_for_float[0]) * abs_frac
-            temperature = logarythmic_temp_for_int + diff
+            return None
         
-        return temperature
-
     def get_rotation_velocity(self, spectral_type):
         '''TODO:
         K, M Spectral
         Assumes same Spectral Type limits (F0 == A9)  and min rotation at G9'''
         letter, num, _ = self.parse_spectral_type(spectral_type)
 
-        if letter not in ['M', 'K']:
+        if letter not in ['M', 'K', 'S', 'C'] and num is not None:
             r_scale = {
                 'O0': 190,
                 'B0': 200,
@@ -120,7 +150,7 @@ class stars_processor():
                 diff = (logarythmic_rotations_float[f'{letter}{floor_value}'][0] - logarythmic_rotations_float[f'{letter}{floor_value}'][1]) * abs_frac
                 rotation = float(logarythmic_rotations_for_float[f'{letter}{floor_value}'] + diff)
         
-        elif letter in ['M', 'K']:
+        elif letter in ['M', 'K', 'S', 'C'] or num is None:
             rotation = np.nan
         
         return rotation
