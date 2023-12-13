@@ -10,7 +10,7 @@ class Star():
 
     """
 
-    def __init__(self, const, name, mag, ra, dec, spectral_type):
+    def __init__(self, source, const, name, mag, ra, dec, spectral_type):
         """
         Initializes the star object with its name and magnitude, and position
         as right ascension (ra) and declination (dec) (in radians), spectral type, rotation
@@ -19,8 +19,9 @@ class Star():
         """
         sp = stars_processor()
 
+        self.source = source
         self.const = sp.get_const_complete_name(const)
-        self.star_num, self.name = sp.parse_name(const, name)
+        self.star_num, self.bd_name = sp.parse_name(const, name)
         self.mag = mag
         self.ra = ra
         self.dec = dec
@@ -54,13 +55,15 @@ def get_stars_in_constellation(constellation):
     stars = []
     with open(r'..\data\bsc5.dat', 'r') as fi:
         for line in fi.readlines():
+            source = line.strip()
             const = line[11:14]
             if const != constellation:
                 continue
             
             # print(line)
-            name = line[4:21]
+            # name = line[4:21]
             # name = line[:21]
+            name = line[:29]
 
             try:
                 mag = float(line[102:107])  # might be rounding down
@@ -93,7 +96,7 @@ def get_stars_in_constellation(constellation):
             # temp = line[177:179]
             # print(temp)
 
-            stars.append(Star(constellation, name, mag, ra, dec, spectral_type))
+            stars.append(Star(source, constellation, name, mag, ra, dec, spectral_type))
 
     n = len(stars)
     
@@ -134,5 +137,5 @@ def generate_stars_map(stars, n, constellation):
             cy = padding + (1-ry) * (height - 2*padding)
             print('<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}"'
                 ' stroke="none" fill="#ffffff" name="{name:s}"/>'.format(
-                cx=cx, cy=cy, r=max(1,5-star.mag), name=star.name), file=f)
+                cx=cx, cy=cy, r=max(1,5-star.mag), name=star.bd_name), file=f)
         print('</svg>', file=f)

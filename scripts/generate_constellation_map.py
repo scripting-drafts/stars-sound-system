@@ -8,19 +8,20 @@ known_consts = info.get_available_consts()
 def display_stars(stars):
     datalist = []
     for star in stars:
-        if star.star_num.startswith('77'):
+        if True:    # star.star_num.startswith('77')
             data = {}
 
+            data['source'] = star.source
             data['constellation'] = star.const
             data['star_num'] = star.star_num
-            data['name'] = star.name
-            # data['magnitude'] = star.mag
-            # data['right ascendance'] = star.ra
-            # data['declination'] = star.dec
-            # data['spectral type'] = star.spectral_type
-            # data['rotation'] = star.rotation
-            # data['temperature'] = star.temperature
-            # data['luminosity'] = star.lum
+            data['bd_name'] = star.bd_name
+            data['magnitude'] = star.mag
+            data['right ascendance'] = star.ra
+            data['declination'] = star.dec
+            data['spectral type'] = star.spectral_type
+            data['rotation'] = star.rotation
+            data['temperature'] = star.temperature
+            data['luminosity'] = star.lum
 
             # data = star.name, star.mag, star.ra, star.dec, star.spectral_type, star.rotation, star.temperature, star.lum
             print(data)

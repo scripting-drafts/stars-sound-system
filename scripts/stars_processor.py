@@ -48,10 +48,11 @@ class stars_processor():
     
     def parse_name(self, const, name):
         name = name.strip()
-        name = re.search(r'(\b\w+)?(\s+)?(\w+[\.*]?[\w+]*)', name)
+        name = re.search(r'(\b\d+)?(\s+)?(\w+[\.*]?[\w+]*)(\s+)?(\w+)', name)
         # print(name.groups())
         star_num = name.group(1)
-        Durchmusterung_name = name.group(3)
+        Durchmusterung_name = f'{name.group(3)}'
+        print(name.groups())
         Durchmusterung_name = Durchmusterung_name.lstrip(const)
         
         return star_num, Durchmusterung_name
