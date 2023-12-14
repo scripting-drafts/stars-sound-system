@@ -19,7 +19,7 @@ class stars_processor():
         
     def parse_spectral_type(self, spectral_type):
         spectral_type = spectral_type.strip()
-        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M|L|T|Y|C|S)', spectral_type[:1]))
+        letter = ''.join(re.findall(r'^(O|B|A|F|G|K|M|R|N|L|T|Y|C|S)', spectral_type[:1]))
         nums = ''.join(re.findall(r'(\d.\d|\d?)', spectral_type[1:])[0])
         # print(spectral_type)
 
@@ -69,6 +69,8 @@ class stars_processor():
                 'G': [5200, 6000],
                 'K': [3700, 5200],
                 'M': [2400, 3700],
+                'R': [2400, 3700],  # TODO: To Review
+                'N': [2400, 3700],  # TODO: To Review
                 'S': [1800, 4000],
                 'C': [700, 3500],   # Specular temperature
                 'Y': [300, 700]
